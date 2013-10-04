@@ -1,7 +1,7 @@
 {
-    "name":         "knplabs/gaufrette",
+    "name":         "tsslabs/gaufrette",
     "type":         "library",
-    "description":  "PHP5 library that provides a filesystem abstraction layer",
+    "description":  "PHP5 library that provides a filesystem abstraction layer, Dropbox changes",
     "keywords":     ["file", "filesystem", "media", "abstraction"],
     "minimum-stability": "dev",
     "homepage":     "http://knplabs.com",
@@ -13,7 +13,7 @@
         },
         {
             "name":     "The contributors",
-            "homepage": "http://github.com/knplabs/Gaufrette/contributors"
+            "homepage": "http://github.com/tsslabs/Gaufrette/contributors"
         }
     ],
     "repositories": [
