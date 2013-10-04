@@ -18,15 +18,17 @@ use \Dropbox_Exception_NotFound as DropboxNotFoundException;
 class Dropbox implements Adapter
 {
     protected $client;
+    protected $directory;
 
     /**
      * Constructor
      *
      * @param \Dropbox_API $client The Dropbox API client
      */
-    public function __construct(DropboxApi $client)
+    public function __construct(DropboxApi $client, $directory = null)
     {
         $this->client = $client;
+        $this->directory = $directory;
     }
 
     /**
@@ -39,7 +41,7 @@ class Dropbox implements Adapter
     public function read($key)
     {
         try {
-            return $this->client->getFile($key);
+            return $this->client->getFile($this->computePath($key));
         } catch (DropboxNotFoundException $e) {
             return false;
         }
@@ -71,7 +73,7 @@ class Dropbox implements Adapter
         fseek($resource, 0);
 
         try {
-            $this->client->putFile($key, $resource);
+            $this->client->putFile($this->computePath($key), $resource);
         } catch (\Exception $e) {
             fclose($resource);
 
@@ -89,7 +91,7 @@ class Dropbox implements Adapter
     public function delete($key)
     {
         try {
-            $this->client->delete($key);
+            $this->client->delete($this->computePath($key));
         } catch (DropboxNotFoundException $e) {
             return false;
         }
@@ -103,7 +105,7 @@ class Dropbox implements Adapter
     public function rename($sourceKey, $targetKey)
     {
         try {
-            $this->client->move($sourceKey, $targetKey);
+            $this->client->move($this->computePath($sourceKey), $this->computePath($targetKey));
         } catch (DropboxNotFoundException $e) {
             return false;
         }
@@ -165,16 +167,28 @@ class Dropbox implements Adapter
     private function getDropboxMetadata($key)
     {
         try {
-            $metadata = $this->client->getMetaData($key, true);
+            $metadata = $this->client->getMetaData($this->computePath($key), true);
         } catch (\Dropbox_Exception_NotFound $e) {
-            throw new Exception\FileNotFound($key, 0, $e);
+            throw new Exception\FileNotFound($this->computePath($key), 0, $e);
         }
 
         // TODO find a way to exclude deleted files
         if (isset($metadata['is_deleted']) && $metadata['is_deleted']) {
-            throw new Exception\FileNotFound($key);
+            throw new Exception\FileNotFound($this->computePath($key));
         }
 
         return $metadata;
+    }
+
+    /**
+     * Computes the path for the specified key
+     *
+     * @param string $key
+     *
+     * @return string
+     */
+    protected function computePath($key)
+    {
+        return $this->directory . '/' . ltrim($key, '/');
     }
 }
