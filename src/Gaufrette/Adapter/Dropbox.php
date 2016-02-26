@@ -180,10 +180,10 @@ class Dropbox implements Adapter
         return $metadata;
     }
 
-    public function url($key)
+    public function url($key, $options = array())
     {
         if($this->exists($key)) {
-            $share = $this->client->share($this->computePath($key));
+            $share = $this->client->share($this->computePath($key), $options);
 
             return $share['url'];
         }
